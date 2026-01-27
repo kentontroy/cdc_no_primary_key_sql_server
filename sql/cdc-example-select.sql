@@ -55,9 +55,9 @@ FROM cdc.dbo_cdc_test_sales_events_CT s
 WHERE JSON_VALUE(s.col_text,'$.sku') = 'SKU-0076'
 ORDER BY __$start_lsn DESC, __$seqval DESC;
 
-SELECT row_count, row_json, last_lsn, last_seq
+SELECT capture_instance, state_rv, state_rv_bigint, row_count, row_json, last_lsn, last_seq
 FROM dbo.cdc_multiset_state
 WHERE capture_instance = N'dbo_cdc_test_sales_events'
-ORDER BY row_count DESC;
+ORDER BY state_rv_bigint DESC;
 
 GO
