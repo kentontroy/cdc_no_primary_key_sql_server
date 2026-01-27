@@ -10,9 +10,11 @@ CREATE TABLE dbo.cdc_multiset_state (
 
 ALTER TABLE dbo.cdc_multiset_state
 ADD state_rv rowversion;
+GO
 
 ALTER TABLE dbo.cdc_multiset_state
 ADD state_rv_bigint AS CONVERT(bigint, state_rv) PERSISTED;
+GO
 
 CREATE INDEX IX_state_capture_rvbigint
 ON dbo.cdc_multiset_state (capture_instance, state_rv_bigint);
