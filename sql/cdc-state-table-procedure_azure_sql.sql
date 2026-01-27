@@ -210,18 +210,18 @@ WHEN NOT MATCHED THEN
   VALUES (@capture_instance, src.row_sig, src.row_json, src.delta_count, src.last_lsn, src.last_seq);
 
 -- Remove signatures that net to zero
-/*
-Replace with:
 UPDATE dbo.cdc_multiset_state
 SET is_deleted = 1,
     row_count = 0
 WHERE capture_instance = @capture_instance
   AND row_count <= 0
   AND is_deleted = 0;
-*/
+/*
+This was replaced by SQL Update above
 DELETE FROM dbo.cdc_multiset_state
 WHERE capture_instance = @capture_instance
   AND row_count <= 0;
+*/
 
 -- Advance watermark to the @to tuple we just processed through
 UPDATE dbo.cdc_multiset_watermark
