@@ -210,6 +210,15 @@ WHEN NOT MATCHED THEN
   VALUES (@capture_instance, src.row_sig, src.row_json, src.delta_count, src.last_lsn, src.last_seq);
 
 -- Remove signatures that net to zero
+/*
+Replace with:
+UPDATE dbo.cdc_multiset_state
+SET is_deleted = 1,
+    row_count = 0
+WHERE capture_instance = @capture_instance
+  AND row_count <= 0
+  AND is_deleted = 0;
+*/
 DELETE FROM dbo.cdc_multiset_state
 WHERE capture_instance = @capture_instance
   AND row_count <= 0;
@@ -232,3 +241,23 @@ WHERE capture_instance = @capture_instance;
     @to_lsn   = @to_lsn,   @to_seq   = @to_seq,   @to_op   = @to_op;
 END;
 GO
+
+/*
+In Snowflake:
+MERGE INTO SALESLT_PRODUCT_STATE t
+USING STAGE_BATCH s
+ON t.ROW_SIG = s.ROW_SIG
+WHEN MATCHED AND s.IS_DELETED THEN
+  DELETE
+WHEN MATCHED THEN
+  UPDATE SET
+    ROW_JSON  = s.ROW_JSON,
+    ROW_COUNT = s.ROW_COUNT,
+    LAST_LSN  = s.LAST_LSN,
+    LAST_SEQ  = s.LAST_SEQ,
+    IS_DELETED = s.IS_DELETED,
+    STATE_RV  = s.STATE_RV
+WHEN NOT MATCHED AND NOT s.IS_DELETED THEN
+  INSERT (ROW_SIG, ROW_JSON, ROW_COUNT, LAST_LSN, LAST_SEQ, IS_DELETED, STATE_RV)
+  VALUES (s.ROW_SIG, s.ROW_JSON, s.ROW_COUNT, s.LAST_LSN, s.LAST_SEQ, s.IS_DELETED, s.STATE_RV);
+*/
